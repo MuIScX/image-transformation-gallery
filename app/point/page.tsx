@@ -5,6 +5,7 @@ import { useMatrix } from "@/context/MatrixContext";
 import { applyMatrix } from "@/lib/matrix";
 import PointCanvas, { type PlottedArrow, type PlottedPoint } from "@/components/PointCanvas";
 import DualExplain from "@/components/DualExplain";
+import MatrixDisplay from "@/components/MatrixDisplay";
 import PageNav from "@/components/PageNav";
 import MatrixInput, { NumberText } from "@/components/MatrixInput";
 
@@ -234,14 +235,18 @@ export default function PointPage() {
             {step === 1 && (
               <DualExplain
                 plain="A 2×2 matrix defines a fixed rule for turning any (x, y) into a new (x′, y′). This shape never changes, no matter what a, b, c, d are."
-                math={[
-                  "x' = a·x + b·y",
-                  "y' = c·x + d·y",
-                  "",
-                  "current matrix:",
-                  `[a b]   [${fmt(a)} ${fmt(b)}]`,
-                  `[c d] = [${fmt(c)} ${fmt(d)}]`,
-                ].join("\n")}
+                math={
+                  <div className="space-y-3">
+                    <div>x&apos; = a·x + b·y</div>
+                    <div>y&apos; = c·x + d·y</div>
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <span className="text-foreground-soft">current matrix:</span>
+                      <MatrixDisplay a="a" b="b" c="c" d="d" />
+                      <span>=</span>
+                      <MatrixDisplay a={fmt(a)} b={fmt(b)} c={fmt(c)} d={fmt(d)} />
+                    </div>
+                  </div>
+                }
               />
             )}
 

@@ -7,6 +7,7 @@ import DualExplain from "@/components/DualExplain";
 import ShowMath from "@/components/ShowMath";
 import PageNav from "@/components/PageNav";
 import MatrixInput from "@/components/MatrixInput";
+import MatrixDisplay from "@/components/MatrixDisplay";
 
 // Literal color values matching the CSS custom properties in globals.css. Canvas 2D fillStyle
 // cannot resolve var(--token) references (no cascade context), so — same convention PointCanvas
@@ -142,11 +143,21 @@ function UnitSquareCanvas({
   );
 }
 
-const WORKED_EXAMPLES: { name: string; calc: string; result: string }[] = [
-  { name: "Scale [2 0; 0 3]", calc: "det = 2(3) − 0 = 6", result: "area × 6" },
-  { name: "Rotation (any θ)", calc: "det = cos²θ + sin²θ = 1", result: "area preserved" },
-  { name: "Shear [1 k; 0 1]", calc: "det = 1(1) − k(0) = 1", result: "area preserved, shape changes" },
-  { name: "Reflect y-axis [-1 0; 0 1]", calc: "det = -1(1) − 0 = -1", result: "area preserved, orientation flipped" },
+const WORKED_EXAMPLES: {
+  name: string;
+  matrix: [string, string, string, string] | null;
+  calc: string;
+  result: string;
+}[] = [
+  { name: "Scale", matrix: ["2", "0", "0", "3"], calc: "det = 2(3) − 0 = 6", result: "area × 6" },
+  { name: "Rotation (any θ)", matrix: null, calc: "det = cos²θ + sin²θ = 1", result: "area preserved" },
+  { name: "Shear", matrix: ["1", "k", "0", "1"], calc: "det = 1(1) − k(0) = 1", result: "area preserved, shape changes" },
+  {
+    name: "Reflect y-axis",
+    matrix: ["-1", "0", "0", "1"],
+    calc: "det = -1(1) − 0 = -1",
+    result: "area preserved, orientation flipped",
+  },
 ];
 
 export default function DeterminantPage() {
@@ -276,9 +287,21 @@ export default function DeterminantPage() {
               {WORKED_EXAMPLES.map((ex) => (
                 <div
                   key={ex.name}
-                  className="grid grid-cols-1 gap-x-4 gap-y-0.5 font-mono font-mono-nums text-[13px] leading-relaxed text-foreground sm:grid-cols-[minmax(0,190px)_minmax(0,220px)_1fr]"
+                  className="grid grid-cols-1 gap-x-4 gap-y-1 font-mono font-mono-nums text-[13px] leading-relaxed text-foreground sm:grid-cols-[minmax(0,190px)_minmax(0,220px)_1fr] sm:items-center"
                 >
-                  <span>{ex.name}:</span>
+                  <span className="flex items-center gap-2">
+                    {ex.name}
+                    {ex.matrix && (
+                      <MatrixDisplay
+                        size="sm"
+                        a={ex.matrix[0]}
+                        b={ex.matrix[1]}
+                        c={ex.matrix[2]}
+                        d={ex.matrix[3]}
+                      />
+                    )}
+                    :
+                  </span>
                   <span>{ex.calc}</span>
                   <span className="text-foreground-soft">→ {ex.result}</span>
                 </div>
@@ -288,19 +311,27 @@ export default function DeterminantPage() {
 
           <ShowMath label="Show the derivation">
             <div>
-              <p className="text-foreground-soft">Scale [2 0; 0 3]</p>
+              <p className="flex items-center gap-2 text-foreground-soft">
+                Scale <MatrixDisplay size="sm" a="2" b="0" c="0" d="3" />
+              </p>
               <p>det = 2(3) − 0(0) = 6 − 0 = 6</p>
             </div>
             <div>
-              <p className="text-foreground-soft">Rotation R(θ) = [cosθ −sinθ; sinθ cosθ]</p>
+              <p className="flex flex-wrap items-center gap-2 text-foreground-soft">
+                Rotation R(θ) = <MatrixDisplay size="sm" a="cosθ" b="-sinθ" c="sinθ" d="cosθ" />
+              </p>
               <p>det = cosθ·cosθ − (−sinθ)·sinθ = cos²θ + sin²θ = 1</p>
             </div>
             <div>
-              <p className="text-foreground-soft">Shear [1 k; 0 1]</p>
+              <p className="flex items-center gap-2 text-foreground-soft">
+                Shear <MatrixDisplay size="sm" a="1" b="k" c="0" d="1" />
+              </p>
               <p>det = 1(1) − k(0) = 1 − 0 = 1</p>
             </div>
             <div>
-              <p className="text-foreground-soft">Reflect y-axis [-1 0; 0 1]</p>
+              <p className="flex items-center gap-2 text-foreground-soft">
+                Reflect y-axis <MatrixDisplay size="sm" a="-1" b="0" c="0" d="1" />
+              </p>
               <p>det = (−1)(1) − 0(0) = −1 − 0 = −1</p>
             </div>
             <div>

@@ -2,6 +2,7 @@
 
 import DualExplain from "@/components/DualExplain";
 import InfoBox from "@/components/InfoBox";
+import MatrixDisplay from "@/components/MatrixDisplay";
 import RecapTable from "@/components/RecapTable";
 import PageNav from "@/components/PageNav";
 import { useMatrix } from "@/context/MatrixContext";
@@ -38,9 +39,10 @@ export default function SummaryPage() {
         />
 
         <div className="space-y-2">
-          <p className="text-[13px] font-medium text-foreground-soft">
-            Live check — currently active matrix A = [{a} {b}; {c} {d}]
-          </p>
+          <div className="flex flex-wrap items-center gap-2 text-[13px] font-medium text-foreground-soft">
+            Live check — currently active matrix
+            <MatrixDisplay size="sm" label="A =" a={round2(a)} b={round2(b)} c={round2(c)} d={round2(d)} />
+          </div>
 
           {eig.type === "real" ? (
             <InfoBox

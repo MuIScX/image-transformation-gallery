@@ -8,6 +8,7 @@ import ShowMath from "@/components/ShowMath";
 import InfoBox from "@/components/InfoBox";
 import PageNav from "@/components/PageNav";
 import MatrixInput from "@/components/MatrixInput";
+import MatrixDisplay from "@/components/MatrixDisplay";
 
 // Small numeric formatter shared by every readout on this page — rounds to 2 decimals and
 // strips trailing zeros so e.g. "3" not "3.00", but keeps "2.5" as-is.
@@ -283,10 +284,11 @@ export default function EigenPage() {
       <div className="mt-10">
         <ShowMath label="How do we actually find them?">
           <div>det(A − λI) = 0</div>
-          <div>&nbsp;</div>
-          <div>det [ a−λ&nbsp;&nbsp; b&nbsp; ] = 0</div>
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;[ c&nbsp;&nbsp; d−λ ]</div>
-          <div>&nbsp;</div>
+          <div className="flex flex-wrap items-center gap-2 py-1">
+            <span>det</span>
+            <MatrixDisplay a="a−λ" b="b" c="c" d="d−λ" />
+            <span>= 0</span>
+          </div>
           <div>(a−λ)(d−λ) − bc = 0</div>
           <div>&nbsp;</div>
           <div className="text-foreground-soft">
@@ -308,7 +310,9 @@ export default function EigenPage() {
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 rounded bg-surface px-4 py-3 shadow-border-sm">
-            <div className="text-[13px] font-medium text-foreground">Scale [2 0; 0 3]</div>
+            <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
+              Scale <MatrixDisplay size="sm" a="2" b="0" c="0" d="3" />
+            </div>
             <div className="font-mono font-mono-nums text-[13px] leading-relaxed text-foreground">
               det(A−λI) = (2−λ)(3−λ) = 0
               <br />→ λ₁ = {fmt(scaleInfo.type === "real" ? scaleInfo.values[0] : 0)}, λ₂ ={" "}
@@ -320,7 +324,9 @@ export default function EigenPage() {
           </div>
 
           <div className="space-y-2 rounded bg-surface px-4 py-3 shadow-border-sm">
-            <div className="text-[13px] font-medium text-foreground">Shear [1 k; 0 1]</div>
+            <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
+              Shear <MatrixDisplay size="sm" a="1" b="k" c="0" d="1" />
+            </div>
             <div className="font-mono font-mono-nums text-[13px] leading-relaxed text-foreground">
               det(A−λI) = (1−λ)² = 0
               <br />→ λ = 1 (double root)
@@ -342,8 +348,8 @@ export default function EigenPage() {
           </div>
 
           <div className="space-y-2 rounded bg-surface px-4 py-3 shadow-border-sm">
-            <div className="text-[13px] font-medium text-foreground">
-              Rotation 90° [0 −1; 1 0]
+            <div className="flex flex-wrap items-center gap-2 text-[13px] font-medium text-foreground">
+              Rotation 90° <MatrixDisplay size="sm" a="0" b="-1" c="1" d="0" />
             </div>
             <div className="font-mono font-mono-nums text-[13px] leading-relaxed text-foreground">
               λ = {rot90Info.type === "complex" ? `${fmt(rot90Info.re)} ± ${fmt(rot90Info.im)}i` : "±i"}
@@ -364,9 +370,9 @@ export default function EigenPage() {
         <h2 className="text-[17px] font-semibold tracking-tight text-foreground">
           Right now, on the current matrix
         </h2>
-        <p className="mt-1 font-mono font-mono-nums text-[13px] text-foreground-soft">
-          A = [{fmt(a)} {fmt(b)}; {fmt(c)} {fmt(d)}]
-        </p>
+        <div className="mt-1 text-[13px] text-foreground-soft">
+          <MatrixDisplay size="sm" label="A =" a={fmt(a)} b={fmt(b)} c={fmt(c)} d={fmt(d)} />
+        </div>
 
         <div className="mt-3 max-w-sm">
           {liveInfo.type === "real" ? (

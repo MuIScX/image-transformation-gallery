@@ -5,6 +5,7 @@ import { PRESETS, determinant, eigenInfo, type Matrix2 } from "@/lib/matrix";
 import { transformImageData } from "@/lib/transformImage";
 import { paintSampleImage } from "@/lib/sampleImage";
 import EigenOverlay from "@/components/EigenOverlay";
+import MatrixDisplay from "@/components/MatrixDisplay";
 import PageNav from "@/components/PageNav";
 
 // Static, presentable reference grid — doubles as the "set of original & transformed images
@@ -100,9 +101,9 @@ function GalleryCard({ entry }: { entry: GalleryEntry }) {
 
       <div className="space-y-1">
         <h2 className="text-[14px] font-semibold tracking-tight text-foreground">{entry.name}</h2>
-        <p className="break-words font-mono text-[11px] text-foreground-soft">
-          [{fmt(a)} {fmt(b)}; {fmt(c)} {fmt(d)}]
-        </p>
+        <div className="text-[11px] text-foreground-soft">
+          <MatrixDisplay size="sm" a={fmt(a)} b={fmt(b)} c={fmt(c)} d={fmt(d)} />
+        </div>
         <p
           className={`font-mono font-mono-nums text-[11px] ${
             det < 0 ? "font-semibold text-warn" : "text-foreground"

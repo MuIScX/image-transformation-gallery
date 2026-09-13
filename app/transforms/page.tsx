@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { useMatrix } from "@/context/MatrixContext";
 import { type Matrix2 } from "@/lib/matrix";
 import DualExplain from "@/components/DualExplain";
+import MatrixDisplay from "@/components/MatrixDisplay";
 import MatrixInput from "@/components/MatrixInput";
 import ImageCompareCanvas from "@/components/ImageCompareCanvas";
 import PageNav from "@/components/PageNav";
@@ -12,7 +13,7 @@ type CardSpec = {
   id: string;
   title: string;
   plain: string;
-  math: string;
+  math: ReactNode;
   defaultMatrix: Matrix2;
   worked: ReactNode;
   property: string;
@@ -23,7 +24,13 @@ const CARDS: CardSpec[] = [
     id: "scale",
     title: "Scale",
     plain: "Stretches or squashes the image along each axis independently.",
-    math: "A = [ sx  0  ]\n    [ 0   sy ]\nx' = sx·x\ny' = sy·y",
+    math: (
+      <>
+        <MatrixDisplay label="A =" a="sx" b="0" c="0" d="sy" />
+        <div className="mt-2">x&apos; = sx·x</div>
+        <div>y&apos; = sy·y</div>
+      </>
+    ),
     defaultMatrix: { a: 2, b: 0, c: 0, d: 1.5 },
     worked: (
       <>
@@ -40,12 +47,13 @@ const CARDS: CardSpec[] = [
     title: "Rotation",
     plain:
       "Spins the image around its center by an angle θ, without stretching or squashing anything.",
-    math: "A = [ cosθ  -sinθ ]\n    [ sinθ   cosθ ]",
+    math: <MatrixDisplay label="A =" a="cosθ" b="-sinθ" c="sinθ" d="cosθ" />,
     defaultMatrix: { a: 0.707, b: -0.707, c: 0.707, d: 0.707 },
     worked: (
       <>
-        90° rotation → <code className="font-mono">A = [0 -1; 1 0]</code>. Apply to (1,0):{" "}
-        <code className="font-mono">A·(1,0) = (0,1)</code>, so (1,0) → (0,1) — a quarter turn.
+        90° rotation → <MatrixDisplay size="sm" label="A =" a="0" b="-1" c="1" d="0" />. Apply to
+        (1,0): <code className="font-mono">A·(1,0) = (0,1)</code>, so (1,0) → (0,1) — a quarter
+        turn.
       </>
     ),
     property:
@@ -56,15 +64,21 @@ const CARDS: CardSpec[] = [
     title: "Shear",
     plain:
       "Slides points sideways by an amount proportional to their height — turns a rectangle into a parallelogram.",
-    math: "A = [ 1  k ]\n    [ 0  1 ]\nx' = x + k·y\ny' = y",
+    math: (
+      <>
+        <MatrixDisplay label="A =" a="1" b="k" c="0" d="1" />
+        <div className="mt-2">x&apos; = x + k·y</div>
+        <div>y&apos; = y</div>
+      </>
+    ),
     defaultMatrix: { a: 1, b: 0.6, c: 0, d: 1 },
     worked: (
       <>
         <code className="font-mono">k = 0.5</code> →{" "}
-        <code className="font-mono">A = [1 0.5; 0 1]</code> →{" "}
+        <MatrixDisplay size="sm" label="A =" a="1" b="0.5" c="0" d="1" /> →{" "}
         <code className="font-mono">{"x' = x + 0.5y, y' = y"}</code> → the classic
         slanted/parallelogram look. Vertical shear exists too:{" "}
-        <code className="font-mono">A = [1 0; k 1]</code>.
+        <MatrixDisplay size="sm" label="A =" a="1" b="0" c="k" d="1" />.
       </>
     ),
     property:
@@ -74,13 +88,25 @@ const CARDS: CardSpec[] = [
     id: "reflection",
     title: "Reflection",
     plain: "Flips the image across a line, like a mirror.",
-    math:
-      "Across y-axis:  A = [-1  0]     (x,y) → (-x, y)\n" +
-      "                    [ 0  1]\n" +
-      "Across x-axis:  A = [ 1  0]     (x,y) → (x, -y)\n" +
-      "                    [ 0 -1]\n" +
-      "Across y = x:   A = [ 0  1]     (x,y) → (y, x)\n" +
-      "                    [ 1  0]",
+    math: (
+      <div className="space-y-2.5">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="w-[6.5rem] shrink-0 text-foreground-soft">Across y-axis:</span>
+          <MatrixDisplay label="A =" a="-1" b="0" c="0" d="1" />
+          <span>(x,y) → (-x, y)</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="w-[6.5rem] shrink-0 text-foreground-soft">Across x-axis:</span>
+          <MatrixDisplay label="A =" a="1" b="0" c="0" d="-1" />
+          <span>(x,y) → (x, -y)</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="w-[6.5rem] shrink-0 text-foreground-soft">Across y = x:</span>
+          <MatrixDisplay label="A =" a="0" b="1" c="1" d="0" />
+          <span>(x,y) → (y, x)</span>
+        </div>
+      </div>
+    ),
     defaultMatrix: { a: -1, b: 0, c: 0, d: 1 },
     worked: (
       <>
