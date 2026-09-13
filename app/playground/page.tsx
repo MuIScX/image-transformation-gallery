@@ -40,6 +40,7 @@ function contextualNote(a: number, b: number, c: number, d: number): string {
 export default function PlaygroundPage() {
   const { a, b, c, d, setMatrix } = useMatrix();
   const [uploadedImage, setUploadedImage] = useState<HTMLImageElement | null>(null);
+  const [showEigen, setShowEigen] = useState(true);
 
   const det = determinant(a, b, c, d);
   const tr = trace(a, b, c, d);
@@ -102,10 +103,21 @@ export default function PlaygroundPage() {
 
         <section className="min-w-0 space-y-5">
           <div className="min-w-0 overflow-x-auto rounded-lg bg-background p-5 shadow-border sm:p-6">
+            <div className="mb-4 flex items-center justify-end">
+              <label className="flex cursor-pointer select-none items-center gap-2 text-[13px] text-foreground-soft">
+                <input
+                  type="checkbox"
+                  checked={showEigen}
+                  onChange={(e) => setShowEigen(e.target.checked)}
+                  className="h-3.5 w-3.5 accent-eigen focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+                />
+                Show eigenvector lines
+              </label>
+            </div>
             <ImageCompareCanvas
               matrix={{ a, b, c, d }}
               image={uploadedImage}
-              showEigenOverlay
+              showEigenOverlay={showEigen}
               size={260}
             />
           </div>
