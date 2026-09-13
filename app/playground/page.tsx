@@ -119,6 +119,7 @@ export default function PlaygroundPage() {
               image={uploadedImage}
               showEigenOverlay={showEigen}
               size={260}
+              zoomable
             />
           </div>
 
