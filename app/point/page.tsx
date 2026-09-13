@@ -76,10 +76,13 @@ export default function PointPage() {
   let canvasArrows: PlottedArrow[] = [];
 
   if (step === 5) {
-    // Step 6 — see it move: original vs. transformed, animated arrow between them.
+    // Step 6 — see it move: the original point stays fixed as a reference; the transformed
+    // point is the thing that actually travels, from the original position to its own, in sync
+    // with the arrow (animateFrom) — otherwise it would sit pre-arrived at (x', y') from frame 0
+    // while only the arrow caught up, which reads as "nothing moved."
     canvasPoints = [
       { x, y, color: "var(--origin)", label: "original" },
-      { x: xPrime, y: yPrime, color: "var(--accent)", label: "transformed" },
+      { x: xPrime, y: yPrime, animateFrom: { x, y }, color: "var(--accent)", label: "transformed" },
     ];
     canvasArrows = [
       {

@@ -2,7 +2,16 @@
 
 import { useEffect, useRef } from "react";
 
-export type PlottedPoint = { x: number; y: number; color: string; label?: string };
+export type PlottedPoint = {
+  x: number;
+  y: number;
+  color: string;
+  label?: string;
+  // When set, this point animates from `animateFrom` to (x, y) instead of sitting statically at
+  // its final position — used for the "transformed" point on /point step 6, so it visibly travels
+  // rather than appearing pre-arrived while the arrow is still catching up to it.
+  animateFrom?: { x: number; y: number };
+};
 export type PlottedArrow = {
   from: { x: number; y: number };
   to: { x: number; y: number };
@@ -53,7 +62,7 @@ export default function PointCanvas({ size = 280, range = 160, points = [], arro
     const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy - y * scale });
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const hasAnimatedArrow = arrows.some((ar) => ar.animate);
+    const hasAnimation = arrows.some((ar) => ar.animate) || points.some((pt) => pt.animateFrom);
 
     function drawStatic(ctx: CanvasRenderingContext2D, progress: number) {
       ctx.clearRect(0, 0, size, size);
@@ -125,7 +134,13 @@ export default function PointCanvas({ size = 280, range = 160, points = [], arro
       }
 
       for (const pt of points) {
-        const { px, py } = toPx(pt.x, pt.y);
+        let plotX = pt.x;
+        let plotY = pt.y;
+        if (pt.animateFrom && !reduceMotion) {
+          plotX = pt.animateFrom.x + (pt.x - pt.animateFrom.x) * progress;
+          plotY = pt.animateFrom.y + (pt.y - pt.animateFrom.y) * progress;
+        }
+        const { px, py } = toPx(plotX, plotY);
         const ptColor = resolveCanvasColor(pt.color);
         ctx.beginPath();
         ctx.arc(px, py, 5, 0, Math.PI * 2);
@@ -143,7 +158,7 @@ export default function PointCanvas({ size = 280, range = 160, points = [], arro
       }
     }
 
-    if (hasAnimatedArrow && !reduceMotion) {
+    if (hasAnimation && !reduceMotion) {
       const duration = 350;
       let start: number | null = null;
       const step = (ts: number) => {
