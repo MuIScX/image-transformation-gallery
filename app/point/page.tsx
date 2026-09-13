@@ -185,10 +185,12 @@ export default function PointPage() {
 
           <PointCanvas points={canvasPoints} arrows={canvasArrows} range={range} />
 
-          {step === 5 && (
+          {(step === 5 || step === 6) && (
             <div className="space-y-3 rounded-lg bg-background p-4 shadow-border">
               <h2 className="text-[13px] font-medium text-foreground-soft">
-                Matrix — edit it and watch the point move
+                {step === 5
+                  ? "Matrix — edit it and watch the point move"
+                  : "Matrix — edit it and watch where (1,0) and (0,1) land"}
               </h2>
               <MatrixInput value={{ a, b, c, d }} onChange={setMatrix} min={-3} max={3} step={0.1} />
             </div>
