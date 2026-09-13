@@ -171,14 +171,16 @@ export default function PointPage() {
             </div>
           </div>
 
-          <div className="space-y-3 rounded-lg bg-background p-4 shadow-border">
-            <h2 className="text-[13px] font-medium text-foreground-soft">
-              Matrix — edit it and every step to the right updates live
-            </h2>
-            <MatrixInput value={{ a, b, c, d }} onChange={setMatrix} min={-3} max={3} step={0.1} />
-          </div>
-
           <PointCanvas points={canvasPoints} arrows={canvasArrows} range={range} />
+
+          {step === 5 && (
+            <div className="space-y-3 rounded-lg bg-background p-4 shadow-border">
+              <h2 className="text-[13px] font-medium text-foreground-soft">
+                Matrix — edit it and watch the point move
+              </h2>
+              <MatrixInput value={{ a, b, c, d }} onChange={setMatrix} min={-3} max={3} step={0.1} />
+            </div>
+          )}
         </div>
 
         {/* Right: step panel */}
