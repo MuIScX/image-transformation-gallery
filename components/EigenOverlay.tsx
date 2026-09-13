@@ -3,6 +3,11 @@ import { eigenInfo, type Matrix2 } from "@/lib/matrix";
 type EigenOverlayProps = {
   matrix: Matrix2;
   size: number;
+  // Must match whatever camera (viewScale/pan) the image canvas beneath this overlay was
+  // rendered with — see lib/transformImage.ts's transformImageData — or the line drifts out of
+  // alignment with the actual invariant direction in the (possibly zoomed/panned) image.
+  viewScale?: number;
+  pan?: { x: number; y: number };
 };
 
 // Draws green line(s) through the canvas center along eigenvector direction(s), length scaled
@@ -14,13 +19,13 @@ type EigenOverlayProps = {
 // line's endpoints must use that same convention or the "invariant direction" it draws stops
 // lining up with the actual invariant direction in the image underneath for any eigenvector with
 // a non-zero y-component.
-export default function EigenOverlay({ matrix, size }: EigenOverlayProps) {
+export default function EigenOverlay({ matrix, size, viewScale = 1, pan = { x: 0, y: 0 } }: EigenOverlayProps) {
   const info = eigenInfo(matrix.a, matrix.b, matrix.c, matrix.d);
   if (info.type !== "real") return null;
 
-  const cx = size / 2;
-  const cy = size / 2;
-  const maxLen = size * 0.46;
+  const cx = size / 2 + pan.x;
+  const cy = size / 2 + pan.y;
+  const maxLen = size * 0.46 * viewScale;
 
   return (
     <svg

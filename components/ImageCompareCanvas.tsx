@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent, type WheelEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent, type WheelEvent } from "react";
 import { transformImageData } from "@/lib/transformImage";
 import { paintSampleImage } from "@/lib/sampleImage";
 import EigenOverlay from "@/components/EigenOverlay";
@@ -19,7 +19,7 @@ type ImageCompareCanvasProps = {
   zoomable?: boolean;
 };
 
-const MIN_ZOOM = 1;
+const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 1.4;
 
@@ -45,19 +45,6 @@ export default function ImageCompareCanvas({
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const dragRef = useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(null);
 
-  const clampPan = useCallback(
-    (p: { x: number; y: number }, z: number) => {
-      const maxOffset = (size * (z - 1)) / 2;
-      return { x: clamp(p.x, -maxOffset, maxOffset), y: clamp(p.y, -maxOffset, maxOffset) };
-    },
-    [size]
-  );
-
-  // Re-clamp whenever zoom changes (e.g. zooming out via the buttons after panning near an edge).
-  useEffect(() => {
-    setPan((p) => clampPan(p, zoom));
-  }, [zoom, clampPan]);
-
   useEffect(() => {
     const originalCanvas = originalRef.current;
     const transformedCanvas = transformedRef.current;
@@ -71,21 +58,39 @@ export default function ImageCompareCanvas({
     transformedCanvas.width = size;
     transformedCanvas.height = size;
 
+    // Paint the base image (procedural sample or uploaded photo) into an offscreen buffer at
+    // native 1:1 scale — this is the fixed "world" the camera (zoom/pan) below samples from. Both
+    // visible canvases are then rendered THROUGH that camera via transformImageData itself (the
+    // "original" with the identity matrix), so zooming out genuinely computes and reveals pixels
+    // that fall outside the plain w x h canvas (e.g. a sheared image's corners) — a cosmetic CSS
+    // scale on an already-fixed raster can't do that, since those pixels were never rendered.
+    const raw = document.createElement("canvas");
+    raw.width = size;
+    raw.height = size;
+    const rctx = raw.getContext("2d");
+    if (!rctx) return;
+
     if (image) {
-      octx.fillStyle = "#F6F5F0";
-      octx.fillRect(0, 0, size, size);
+      rctx.fillStyle = "#F6F5F0";
+      rctx.fillRect(0, 0, size, size);
       const scale = Math.max(size / image.width, size / image.height);
       const w = image.width * scale;
       const h = image.height * scale;
-      octx.drawImage(image, (size - w) / 2, (size - h) / 2, w, h);
+      rctx.drawImage(image, (size - w) / 2, (size - h) / 2, w, h);
     } else {
-      paintSampleImage(octx, size, size);
+      paintSampleImage(rctx, size, size);
     }
 
-    const src = octx.getImageData(0, 0, size, size);
-    const dst = transformImageData(src, size, size, matrix.a, matrix.b, matrix.c, matrix.d);
-    tctx.putImageData(dst, 0, 0);
-  }, [matrix.a, matrix.b, matrix.c, matrix.d, size, image]);
+    const rawSrc = rctx.getImageData(0, 0, size, size);
+
+    const originalView = transformImageData(rawSrc, size, size, 1, 0, 0, 1, zoom, pan.x, pan.y);
+    octx.putImageData(originalView, 0, 0);
+
+    const transformedView = transformImageData(
+      rawSrc, size, size, matrix.a, matrix.b, matrix.c, matrix.d, zoom, pan.x, pan.y
+    );
+    tctx.putImageData(transformedView, 0, 0);
+  }, [matrix.a, matrix.b, matrix.c, matrix.d, size, image, zoom, pan.x, pan.y]);
 
   function handlePointerDown(e: PointerEvent<HTMLDivElement>) {
     if (!zoomable) return;
@@ -97,7 +102,11 @@ export default function ImageCompareCanvas({
     if (!zoomable || !dragRef.current) return;
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
-    setPan(clampPan({ x: dragRef.current.panX + dx, y: dragRef.current.panY + dy }, zoom));
+    const maxOffset = size * 1.5;
+    setPan({
+      x: clamp(dragRef.current.panX + dx, -maxOffset, maxOffset),
+      y: clamp(dragRef.current.panY + dy, -maxOffset, maxOffset),
+    });
   }
 
   function handlePointerUp() {
@@ -122,10 +131,6 @@ export default function ImageCompareCanvas({
     setZoom(1);
     setPan({ x: 0, y: 0 });
   }
-
-  const viewTransform = zoomable
-    ? { transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: "center" }
-    : undefined;
 
   return (
     <div className="space-y-3">
@@ -180,16 +185,14 @@ export default function ImageCompareCanvas({
             onPointerCancel={handlePointerUp}
             onWheel={handleWheel}
           >
-            <div style={{ width: size, height: size, ...viewTransform }}>
-              <canvas
-                ref={originalRef}
-                width={size}
-                height={size}
-                className="block"
-                role="img"
-                aria-label="Original image"
-              />
-            </div>
+            <canvas
+              ref={originalRef}
+              width={size}
+              height={size}
+              className="block"
+              role="img"
+              aria-label="Original image"
+            />
           </div>
         </div>
 
@@ -210,17 +213,15 @@ export default function ImageCompareCanvas({
             onPointerCancel={handlePointerUp}
             onWheel={handleWheel}
           >
-            <div className="relative" style={{ width: size, height: size, ...viewTransform }}>
-              <canvas
-                ref={transformedRef}
-                width={size}
-                height={size}
-                className="block"
-                role="img"
-                aria-label="Transformed image"
-              />
-              {showEigenOverlay && <EigenOverlay matrix={matrix} size={size} />}
-            </div>
+            <canvas
+              ref={transformedRef}
+              width={size}
+              height={size}
+              className="block"
+              role="img"
+              aria-label="Transformed image"
+            />
+            {showEigenOverlay && <EigenOverlay matrix={matrix} size={size} viewScale={zoom} pan={pan} />}
           </div>
         </div>
       </div>

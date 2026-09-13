@@ -11,7 +11,16 @@ export function transformImageData(
   a: number,
   b: number,
   c: number,
-  d: number
+  d: number,
+  // Optional output-side camera: viewScale zooms (values <1 fit MORE of the transformed scene
+  // into the same w x h canvas — values >1 zoom in), panX/panY shift which part is visible, both
+  // in output-pixel units. Defaults reproduce the original 1:1, uncentered-camera behavior
+  // exactly, so every existing caller is unaffected. See ImageCompareCanvas's "zoomable" mode —
+  // this is what actually reveals a sheared/scaled image's parts that fall outside the plain
+  // w x h canvas, unlike a cosmetic CSS scale which can only shrink what's already rendered.
+  viewScale = 1,
+  panX = 0,
+  panY = 0
 ): ImageData {
   const dst = new ImageData(w, h);
   const det = a * d - b * c;
@@ -25,9 +34,9 @@ export function transformImageData(
   const bg = [246, 245, 240, 255];
 
   for (let py = 0; py < h; py++) {
-    const oy = py - cy;
+    const oy = (py - cy - panY) / viewScale;
     for (let px = 0; px < w; px++) {
-      const ox = px - cx;
+      const ox = (px - cx - panX) / viewScale;
       let sx = -9999;
       let sy = -9999;
       if (!singular) {
