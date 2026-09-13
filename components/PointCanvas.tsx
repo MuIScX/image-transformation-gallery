@@ -59,10 +59,10 @@ export default function PointCanvas({ size = 280, range = 160, points = [], arro
     const cx = size / 2;
     const cy = size / 2;
     const scale = size / 2 / range;
-    // No y-flip: this must match the raster (y-down) convention transformImageData uses for the
-    // real image elsewhere in the app, or a point's motion here visually rotates the opposite way
-    // from how the same matrix actually rotates the picture on /transforms and /playground.
-    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy + y * scale });
+    // Standard math y-up convention: this is a self-contained abstract diagram (no real image
+    // composited underneath it, unlike EigenOverlay), so points/arrows plot the way a textbook
+    // coordinate-grid diagram would, not flipped to match raster/image coordinates.
+    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy - y * scale });
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const hasAnimation = arrows.some((ar) => ar.animate) || points.some((pt) => pt.animateFrom);

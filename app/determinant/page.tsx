@@ -80,10 +80,10 @@ function UnitSquareCanvas({
     const cx = size / 2;
     const cy = size / 2;
     const scale = (size / 2 / range) * 0.82;
-    // No y-flip: matches the raster (y-down) convention the real image transform uses elsewhere
-    // (transformImageData), so the square deforms here the same visual direction the sample image
-    // actually deforms on /transforms and /playground.
-    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy + y * scale });
+    // Standard math y-up convention: this is a self-contained abstract diagram (no real image
+    // composited underneath it, unlike EigenOverlay), so it should look like a textbook unit
+    // square — sitting above the axis, not flipped to match raster/image coordinates.
+    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy - y * scale });
 
     // axes for orientation
     ctx.strokeStyle = "rgba(29, 36, 48, 0.15)";

@@ -106,10 +106,10 @@ function EigenArrows({ a, b, c, d, info }: EigenArrowsProps) {
     const cx = size / 2;
     const cy = size / 2;
     const scale = size / 2 / range;
-    // No y-flip: matches the raster (y-down) convention the real image transform uses elsewhere
-    // (transformImageData), so a matrix rotates arrows here the same visual direction it actually
-    // rotates the sample image on /transforms and /playground.
-    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy + y * scale });
+    // Standard math y-up convention: this is a self-contained abstract diagram (no real image
+    // composited underneath it, unlike EigenOverlay), so arrows rotate the way a textbook vector
+    // diagram would, not flipped to match raster/image coordinates.
+    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy - y * scale });
 
     // Canvas 2D fillStyle/strokeStyle don't resolve CSS custom properties (unlike SVG
     // presentation attributes elsewhere in the app), so resolve the tokens to concrete colors.

@@ -8,13 +8,12 @@ import DualExplain from "@/components/DualExplain";
 import PageNav from "@/components/PageNav";
 import MatrixInput, { NumberText } from "@/components/MatrixInput";
 
-// Labels describe where the point actually renders on the canvas below, which plots in raster
-// convention (positive y = down) to match how the real image transform renders everywhere else
-// in the app — so y=90 is "lower," matching how it'll look once images are on screen.
+// Labels describe where the point actually renders on the canvas below, which plots with
+// standard math convention (positive y = up) — so y=90 is "upper," not "lower," etc.
 const POINT_PRESETS: { name: string; x: number; y: number }[] = [
   { name: "Default", x: 80, y: -40 },
-  { name: "Lower-right", x: 120, y: 90 },
-  { name: "Upper-left", x: -100, y: -70 },
+  { name: "Upper-right", x: 120, y: 90 },
+  { name: "Lower-left", x: -100, y: -70 },
 ];
 
 const STEP_COUNT = 7;
