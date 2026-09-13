@@ -1,15 +1,33 @@
+import type { ReactNode } from "react";
 import MatrixDisplay from "@/components/MatrixDisplay";
+import Subscript from "@/components/Subscript";
 
 type Row = {
   name: string;
-  matrix: [string, string, string, string] | null;
-  matrixLabel?: string;
-  det: string;
-  eigen: string;
+  matrix: [ReactNode, ReactNode, ReactNode, ReactNode] | null;
+  matrixLabel?: ReactNode;
+  det: ReactNode;
+  eigen: ReactNode;
 };
 
+const SX = <Subscript base="s" sub="x" />;
+const SY = <Subscript base="s" sub="y" />;
+
 const ROWS: Row[] = [
-  { name: "Scale", matrix: ["sx", "0", "0", "sy"], det: "sx·sy", eigen: "sx, sy" },
+  {
+    name: "Scale",
+    matrix: [SX, "0", "0", SY],
+    det: (
+      <>
+        {SX}·{SY}
+      </>
+    ),
+    eigen: (
+      <>
+        {SX}, {SY}
+      </>
+    ),
+  },
   { name: "Rotation", matrix: null, matrixLabel: "R(θ)", det: "1", eigen: "cosθ ± i·sinθ" },
   { name: "Horizontal shear", matrix: ["1", "k", "0", "1"], det: "1", eigen: "1, 1" },
   { name: "Reflection (x-axis)", matrix: ["1", "0", "0", "-1"], det: "-1", eigen: "1, -1" },

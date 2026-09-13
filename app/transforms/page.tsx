@@ -8,6 +8,7 @@ import MatrixDisplay from "@/components/MatrixDisplay";
 import MatrixInput from "@/components/MatrixInput";
 import ImageCompareCanvas from "@/components/ImageCompareCanvas";
 import PageNav from "@/components/PageNav";
+import Subscript from "@/components/Subscript";
 
 type CardSpec = {
   id: string;
@@ -16,8 +17,11 @@ type CardSpec = {
   math: ReactNode;
   defaultMatrix: Matrix2;
   worked: ReactNode;
-  property: string;
+  property: ReactNode;
 };
+
+const SX = <Subscript base="s" sub="x" />;
+const SY = <Subscript base="s" sub="y" />;
 
 const CARDS: CardSpec[] = [
   {
@@ -26,21 +30,27 @@ const CARDS: CardSpec[] = [
     plain: "Stretches or squashes the image along each axis independently.",
     math: (
       <>
-        <MatrixDisplay label="A =" a="sx" b="0" c="0" d="sy" />
-        <div className="mt-2">x&apos; = sx·x</div>
-        <div>y&apos; = sy·y</div>
+        <MatrixDisplay label="A =" a={SX} b="0" c="0" d={SY} />
+        <div className="mt-2">
+          x&apos; = {SX}·x
+        </div>
+        <div>y&apos; = {SY}·y</div>
       </>
     ),
     defaultMatrix: { a: 2, b: 0, c: 0, d: 1.5 },
     worked: (
       <>
-        <code className="font-mono">A = [2 0; 0 1]</code> → x-coordinates double, y unchanged →
-        the image becomes twice as wide. If <code className="font-mono">sx = sy = 2</code>, the
-        whole image scales uniformly.
+        <MatrixDisplay size="sm" label="A =" a="2" b="0" c="0" d="1" /> → x-coordinates double, y
+        unchanged → the image becomes twice as wide. If {SX} = {SY} = 2, the whole image scales
+        uniformly.
       </>
     ),
-    property:
-      "Only uniform scaling (sx = sy) keeps the image's proportions — otherwise circles become ellipses, squares become rectangles.",
+    property: (
+      <>
+        Only uniform scaling ({SX} = {SY}) keeps the image&apos;s proportions — otherwise circles
+        become ellipses, squares become rectangles.
+      </>
+    ),
   },
   {
     id: "rotation",
