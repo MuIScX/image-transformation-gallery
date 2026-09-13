@@ -6,6 +6,7 @@ import { applyMatrix } from "@/lib/matrix";
 import PointCanvas, { type PlottedArrow, type PlottedPoint } from "@/components/PointCanvas";
 import DualExplain from "@/components/DualExplain";
 import PageNav from "@/components/PageNav";
+import { NumberText } from "@/components/MatrixInput";
 
 const POINT_PRESETS: { name: string; x: number; y: number }[] = [
   { name: "Default", x: 80, y: -40 },
@@ -132,24 +133,20 @@ export default function PointPage() {
             <div className="flex items-end gap-4">
               <label className="flex flex-col gap-1">
                 <span className="text-[12px] text-foreground-soft">x</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
+                <NumberText
                   value={x}
-                  onChange={(e) => setPoint({ x: parseFloat(e.target.value) || 0, y })}
+                  onCommit={(n) => setPoint({ x: n, y })}
                   className="w-24 rounded bg-surface px-2 py-1 font-mono font-mono-nums text-[14px] text-foreground shadow-border-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
-                  aria-label="point x coordinate"
+                  ariaLabel="point x coordinate"
                 />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-[12px] text-foreground-soft">y</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
+                <NumberText
                   value={y}
-                  onChange={(e) => setPoint({ x, y: parseFloat(e.target.value) || 0 })}
+                  onCommit={(n) => setPoint({ x, y: n })}
                   className="w-24 rounded bg-surface px-2 py-1 font-mono font-mono-nums text-[14px] text-foreground shadow-border-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
-                  aria-label="point y coordinate"
+                  ariaLabel="point y coordinate"
                 />
               </label>
             </div>

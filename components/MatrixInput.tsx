@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { PRESETS, type Matrix2 } from "@/lib/matrix";
 
 type MatrixInputProps = {
@@ -13,6 +14,46 @@ type MatrixInputProps = {
 
 const CELL_ORDER: (keyof Matrix2)[] = ["a", "b", "c", "d"];
 const CELL_LABEL: Record<keyof Matrix2, string> = { a: "a", b: "b", c: "c", d: "d" };
+
+// A plain type="number" input fights the user mid-keystroke: a naive
+// `parseFloat(e.target.value) || 0` handler sees "-" as NaN, commits 0, and React snaps the
+// field back to "0" before the user can finish typing "-100" (or "2.5" before the "." lands).
+// This buffers the raw text locally and only commits upstream once it parses to a real number,
+// resyncing from the external value on blur (or whenever it changes elsewhere, e.g. a preset).
+export function NumberText({
+  value,
+  onCommit,
+  className,
+  ariaLabel,
+}: {
+  value: number;
+  onCommit: (n: number) => void;
+  className?: string;
+  ariaLabel?: string;
+}) {
+  const [text, setText] = useState(() => String(value));
+
+  useEffect(() => {
+    setText(String(value));
+  }, [value]);
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      value={text}
+      onChange={(e) => {
+        const raw = e.target.value;
+        setText(raw);
+        const n = parseFloat(raw);
+        if (!Number.isNaN(n) && /^-?\d*\.?\d*$/.test(raw)) onCommit(n);
+      }}
+      onBlur={() => setText(String(value))}
+      className={className}
+      aria-label={ariaLabel}
+    />
+  );
+}
 
 // The "bracket" 2x2 matrix control — framed with CSS bracket shapes (border-left/right only,
 // no top/bottom) so it visually reads as a math matrix, not a form. See docs/03-design-system.md.
@@ -34,14 +75,11 @@ export default function MatrixInput({
               <span className="text-[12px] text-foreground-soft">
                 {CELL_LABEL[key]}
               </span>
-              <input
-                type="number"
-                inputMode="decimal"
+              <NumberText
                 value={value[key]}
-                step={step}
-                onChange={(e) => onChange({ [key]: parseFloat(e.target.value) || 0 })}
+                onCommit={(n) => onChange({ [key]: n })}
                 className="w-20 rounded bg-surface px-2 py-1 font-mono font-mono-nums text-[14px] text-foreground shadow-border-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
-                aria-label={`matrix entry ${CELL_LABEL[key]}`}
+                ariaLabel={`matrix entry ${CELL_LABEL[key]}`}
               />
               <input
                 type="range"
