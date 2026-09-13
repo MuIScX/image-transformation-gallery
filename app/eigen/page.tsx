@@ -7,6 +7,7 @@ import DualExplain from "@/components/DualExplain";
 import ShowMath from "@/components/ShowMath";
 import InfoBox from "@/components/InfoBox";
 import PageNav from "@/components/PageNav";
+import MatrixInput from "@/components/MatrixInput";
 
 // Small numeric formatter shared by every readout on this page — rounds to 2 decimals and
 // strips trailing zeros so e.g. "3" not "3.00", but keeps "2.5" as-is.
@@ -205,7 +206,7 @@ function EigenArrows({ a, b, c, d, info }: EigenArrowsProps) {
 }
 
 export default function EigenPage() {
-  const { a, b, c, d } = useMatrix();
+  const { a, b, c, d, setMatrix } = useMatrix();
   const liveInfo = useMemo(() => eigenInfo(a, b, c, d), [a, b, c, d]);
 
   // Static reference examples — deliberately computed from fixed local matrices via eigenInfo(),
@@ -223,6 +224,13 @@ export default function EigenPage() {
         Most directions in an image spin and stretch under a matrix. Eigenvectors are the
         special directions that don&rsquo;t.
       </p>
+
+      <div className="mt-8 space-y-3 rounded-lg bg-background p-5 shadow-border">
+        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+          Try it — watch which arrows stay put as you change the matrix
+        </h2>
+        <MatrixInput value={{ a, b, c, d }} onChange={setMatrix} min={-3} max={3} step={0.1} />
+      </div>
 
       <div className="mt-8 grid gap-8 md:grid-cols-[290px_1fr] md:items-start">
         <div>

@@ -6,6 +6,7 @@ import { applyMatrix, determinant, type Point2 } from "@/lib/matrix";
 import DualExplain from "@/components/DualExplain";
 import ShowMath from "@/components/ShowMath";
 import PageNav from "@/components/PageNav";
+import MatrixInput from "@/components/MatrixInput";
 
 // Literal color values matching the CSS custom properties in globals.css. Canvas 2D fillStyle
 // cannot resolve var(--token) references (no cascade context), so — same convention PointCanvas
@@ -146,7 +147,7 @@ const WORKED_EXAMPLES: { name: string; calc: string; result: string }[] = [
 ];
 
 export default function DeterminantPage() {
-  const { a, b, c, d } = useMatrix();
+  const { a, b, c, d, setMatrix } = useMatrix();
   const det = determinant(a, b, c, d);
   const absDet = Math.abs(det);
   const flipped = det < 0;
@@ -184,6 +185,13 @@ export default function DeterminantPage() {
           Every 2×2 matrix scales area by a single number — the determinant — and its sign tells
           you whether shapes come out mirrored.
         </p>
+      </div>
+
+      <div className="mb-10 space-y-3 rounded-lg bg-background p-5 shadow-border">
+        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+          Try it — the square on the right is this matrix&rsquo;s live image
+        </h2>
+        <MatrixInput value={{ a, b, c, d }} onChange={setMatrix} min={-3} max={3} step={0.1} />
       </div>
 
       <div className="grid gap-10 md:grid-cols-[220px_1fr]">

@@ -6,7 +6,7 @@ import { applyMatrix } from "@/lib/matrix";
 import PointCanvas, { type PlottedArrow, type PlottedPoint } from "@/components/PointCanvas";
 import DualExplain from "@/components/DualExplain";
 import PageNav from "@/components/PageNav";
-import { NumberText } from "@/components/MatrixInput";
+import MatrixInput, { NumberText } from "@/components/MatrixInput";
 
 const POINT_PRESETS: { name: string; x: number; y: number }[] = [
   { name: "Default", x: 80, y: -40 },
@@ -23,16 +23,17 @@ function fmt(n: number): string {
 }
 
 // The term-by-term reveal used in steps 4 and 5: same visual language as <DualExplain>'s math
-// block, but with a third, visually distinct final-result line.
+// block, but broken into one line per term (what got multiplied, and what it came to) before the
+// final sum — so nothing is skipped between "here's the formula" and "here's the answer."
 function TermReveal({
   plain,
   formula,
-  terms,
+  termLines,
   result,
 }: {
   plain: string;
   formula: string;
-  terms: string;
+  termLines: string[];
   result: string;
 }) {
   return (
@@ -42,9 +43,14 @@ function TermReveal({
         <div className="font-mono font-mono-nums text-[14px] leading-relaxed text-foreground">
           {formula}
         </div>
-        <div className="font-mono font-mono-nums text-[14px] leading-relaxed text-foreground-soft">
-          {terms}
-        </div>
+        {termLines.map((line, i) => (
+          <div
+            key={i}
+            className="font-mono font-mono-nums text-[14px] leading-relaxed text-foreground-soft"
+          >
+            {line}
+          </div>
+        ))}
         <div className="font-mono font-mono-nums text-[15px] font-semibold leading-relaxed text-accent">
           {result}
         </div>
@@ -54,7 +60,7 @@ function TermReveal({
 }
 
 export default function PointPage() {
-  const { a, b, c, d, point, setPoint } = useMatrix();
+  const { a, b, c, d, point, setPoint, setMatrix } = useMatrix();
   const [step, setStep] = useState(0); // 0-indexed, steps 1..7
 
   const { x, y } = point;
@@ -165,6 +171,13 @@ export default function PointPage() {
             </div>
           </div>
 
+          <div className="space-y-3 rounded-lg bg-background p-4 shadow-border">
+            <h2 className="text-[13px] font-medium text-foreground-soft">
+              Matrix — edit it and every step to the right updates live
+            </h2>
+            <MatrixInput value={{ a, b, c, d }} onChange={setMatrix} min={-3} max={3} step={0.1} />
+          </div>
+
           <PointCanvas points={canvasPoints} arrows={canvasArrows} range={range} />
         </div>
 
@@ -229,19 +242,25 @@ export default function PointPage() {
 
             {step === 3 && (
               <TermReveal
-                plain="The new x-coordinate is a weighted mix of the old x and the old y — that's all matrix multiplication is doing here."
+                plain="The new x-coordinate is a weighted mix of the old x and the old y — that's all matrix multiplication is doing here. Two small multiplications, then add them."
                 formula={`x' = (${fmt(a)})(${fmt(x)}) + (${fmt(b)})(${fmt(y)})`}
-                terms={`x' = ${fmt(term1x)} + ${fmt(term2x)}`}
-                result={`x' = ${fmt(xPrime)}`}
+                termLines={[
+                  `term 1 = a · x = (${fmt(a)})(${fmt(x)}) = ${fmt(term1x)}`,
+                  `term 2 = b · y = (${fmt(b)})(${fmt(y)}) = ${fmt(term2x)}`,
+                ]}
+                result={`x' = term 1 + term 2 = ${fmt(term1x)} + ${fmt(term2x)} = ${fmt(xPrime)}`}
               />
             )}
 
             {step === 4 && (
               <TermReveal
-                plain="Same idea, using the matrix's second row instead of its first."
+                plain="Same idea, using the matrix's second row instead of its first — c and d in place of a and b."
                 formula={`y' = (${fmt(c)})(${fmt(x)}) + (${fmt(d)})(${fmt(y)})`}
-                terms={`y' = ${fmt(term1y)} + ${fmt(term2y)}`}
-                result={`y' = ${fmt(yPrime)}`}
+                termLines={[
+                  `term 1 = c · x = (${fmt(c)})(${fmt(x)}) = ${fmt(term1y)}`,
+                  `term 2 = d · y = (${fmt(d)})(${fmt(y)}) = ${fmt(term2y)}`,
+                ]}
+                result={`y' = term 1 + term 2 = ${fmt(term1y)} + ${fmt(term2y)} = ${fmt(yPrime)}`}
               />
             )}
 
