@@ -80,7 +80,10 @@ function UnitSquareCanvas({
     const cx = size / 2;
     const cy = size / 2;
     const scale = (size / 2 / range) * 0.82;
-    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy - y * scale });
+    // No y-flip: matches the raster (y-down) convention the real image transform uses elsewhere
+    // (transformImageData), so the square deforms here the same visual direction the sample image
+    // actually deforms on /transforms and /playground.
+    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy + y * scale });
 
     // axes for orientation
     ctx.strokeStyle = "rgba(29, 36, 48, 0.15)";

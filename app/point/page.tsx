@@ -8,6 +8,9 @@ import DualExplain from "@/components/DualExplain";
 import PageNav from "@/components/PageNav";
 import MatrixInput, { NumberText } from "@/components/MatrixInput";
 
+// Labels describe where the point actually renders on the canvas below, which plots in raster
+// convention (positive y = down) to match how the real image transform renders everywhere else
+// in the app — so y=90 is "lower," matching how it'll look once images are on screen.
 const POINT_PRESETS: { name: string; x: number; y: number }[] = [
   { name: "Default", x: 80, y: -40 },
   { name: "Lower-right", x: 120, y: 90 },
@@ -107,13 +110,19 @@ export default function PointPage() {
     ];
   }
 
-  // Pick a canvas range that comfortably fits everything currently plotted.
+  // Pick a canvas range that comfortably fits everything currently plotted. Step 7 plots basis
+  // vectors and their images — coordinates around magnitude 1-3 — a completely different scale
+  // from the point coordinates steps 1-6 use (up to ~120). Reusing one shared floor for both
+  // zoomed step 7's unit-scale vectors out to the same view as an 80-unit point, collapsing them
+  // into an illegible cluster at the origin — so the two cases get their own floor/rounding.
   const allCoords = [
     ...canvasPoints.flatMap((p) => [p.x, p.y]),
     ...canvasArrows.flatMap((ar) => [ar.from.x, ar.from.y, ar.to.x, ar.to.y]),
   ];
-  const maxAbs = Math.max(20, ...allCoords.map((v) => Math.abs(v)));
-  const range = Math.max(160, Math.ceil((maxAbs * 1.25) / 10) * 10);
+  const range =
+    step === 6
+      ? Math.max(2, Math.ceil(Math.max(1, ...allCoords.map((v) => Math.abs(v))) * 1.3 * 10) / 10)
+      : Math.max(160, Math.ceil((Math.max(20, ...allCoords.map((v) => Math.abs(v))) * 1.25) / 10) * 10);
 
   const stepTitles = [
     "Start with a point",

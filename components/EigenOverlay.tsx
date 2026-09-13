@@ -8,6 +8,12 @@ type EigenOverlayProps = {
 // Draws green line(s) through the canvas center along eigenvector direction(s), length scaled
 // by |lambda| (clamped). Renders nothing when eigenvalues are complex — the absence of green
 // lines on e.g. a rotation is itself part of the lesson (paired with explanatory text elsewhere).
+//
+// This overlay sits directly on top of the transformed image canvas (ImageCompareCanvas), which
+// is drawn by transformImageData in raw raster coordinates (y increases downward, no flip). The
+// line's endpoints must use that same convention or the "invariant direction" it draws stops
+// lining up with the actual invariant direction in the image underneath for any eigenvector with
+// a non-zero y-component.
 export default function EigenOverlay({ matrix, size }: EigenOverlayProps) {
   const info = eigenInfo(matrix.a, matrix.b, matrix.c, matrix.d);
   if (info.type !== "real") return null;
@@ -28,9 +34,9 @@ export default function EigenOverlay({ matrix, size }: EigenOverlayProps) {
         const scaled = Math.max(0.35, Math.min(1.4, lambda)) / 1.4;
         const len = maxLen * scaled;
         const x1 = cx - v[0] * len;
-        const y1 = cy + v[1] * len;
+        const y1 = cy - v[1] * len;
         const x2 = cx + v[0] * len;
-        const y2 = cy - v[1] * len;
+        const y2 = cy + v[1] * len;
         return (
           <line
             key={i}

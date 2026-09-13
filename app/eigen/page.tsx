@@ -106,7 +106,10 @@ function EigenArrows({ a, b, c, d, info }: EigenArrowsProps) {
     const cx = size / 2;
     const cy = size / 2;
     const scale = size / 2 / range;
-    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy - y * scale });
+    // No y-flip: matches the raster (y-down) convention the real image transform uses elsewhere
+    // (transformImageData), so a matrix rotates arrows here the same visual direction it actually
+    // rotates the sample image on /transforms and /playground.
+    const toPx = (x: number, y: number) => ({ px: cx + x * scale, py: cy + y * scale });
 
     // Canvas 2D fillStyle/strokeStyle don't resolve CSS custom properties (unlike SVG
     // presentation attributes elsewhere in the app), so resolve the tokens to concrete colors.
