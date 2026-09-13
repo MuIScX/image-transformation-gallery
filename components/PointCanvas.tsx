@@ -18,6 +18,16 @@ type PointCanvasProps = {
   arrows?: PlottedArrow[];
 };
 
+// Canvas 2D's fillStyle/strokeStyle does NOT resolve CSS var(...) the way SVG presentation
+// attributes do — passing "var(--origin)" straight through silently draws nothing/black.
+// Resolve any var(--token) reference against the root element's computed style first.
+function resolveCanvasColor(color: string): string {
+  const match = color.match(/^var\((--[\w-]+)\)$/);
+  if (!match) return color;
+  const resolved = getComputedStyle(document.documentElement).getPropertyValue(match[1]).trim();
+  return resolved || color;
+}
+
 // Mini coordinate-grid canvas used on /point. Plots points/arrows in math coordinates
 // (y-up, origin at center) against a pixel canvas (y-down, origin at corner).
 export default function PointCanvas({ size = 280, range = 160, points = [], arrows = [] }: PointCanvasProps) {
@@ -100,7 +110,8 @@ export default function PointCanvas({ size = 280, range = 160, points = [], arro
           };
         }
         const to = toPx(target.x, target.y);
-        ctx.strokeStyle = arrow.color;
+        const arrowColor = resolveCanvasColor(arrow.color);
+        ctx.strokeStyle = arrowColor;
         ctx.lineWidth = 2;
         if (arrow.dashed) ctx.setLineDash([5, 4]);
         else ctx.setLineDash([]);
@@ -110,21 +121,22 @@ export default function PointCanvas({ size = 280, range = 160, points = [], arro
         ctx.stroke();
         ctx.setLineDash([]);
         const angle = Math.atan2(to.py - from.py, to.px - from.px);
-        drawArrowhead(to.px, to.py, angle, arrow.color);
+        drawArrowhead(to.px, to.py, angle, arrowColor);
       }
 
       for (const pt of points) {
         const { px, py } = toPx(pt.x, pt.y);
+        const ptColor = resolveCanvasColor(pt.color);
         ctx.beginPath();
         ctx.arc(px, py, 5, 0, Math.PI * 2);
-        ctx.fillStyle = pt.color;
+        ctx.fillStyle = ptColor;
         ctx.fill();
         ctx.lineWidth = 1.5;
         ctx.strokeStyle = "#ffffff";
         ctx.stroke();
         if (pt.label) {
-          ctx.font = "12px var(--font-sans, sans-serif)";
-          ctx.fillStyle = pt.color;
+          ctx.font = "12px -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif";
+          ctx.fillStyle = ptColor;
           ctx.textBaseline = "bottom";
           ctx.fillText(pt.label, px + 8, py - 4);
         }
