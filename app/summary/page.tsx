@@ -4,6 +4,7 @@ import DualExplain from "@/components/DualExplain";
 import InfoBox from "@/components/InfoBox";
 import MatrixDisplay from "@/components/MatrixDisplay";
 import RecapTable from "@/components/RecapTable";
+import Subscript from "@/components/Subscript";
 import PageNav from "@/components/PageNav";
 import { useMatrix } from "@/context/MatrixContext";
 import { determinant, trace, eigenInfo } from "@/lib/matrix";
@@ -37,6 +38,26 @@ export default function SummaryPage() {
           plain="These aren't coincidences — for any 2×2 matrix, the determinant is always the product of its eigenvalues, and the trace is always their sum. It's a quick way to sanity-check an eigenvalue calculation: multiply them together, and it should equal what you already know the determinant to be."
           math={"det(A)   = λ₁ · λ₂\ntrace(A) = λ₁ + λ₂ = a + d"}
         />
+
+        <DualExplain
+          plain="Trace is simpler than it looks: just add the two diagonal entries, a and d. The off-diagonal entries b and c don't matter for this one at all — unlike the determinant, which uses all four."
+          math={`trace(A) = a + d = ${round2(a)} + ${round2(d)} = ${round2(tr)}`}
+        />
+
+        <p className="rounded bg-surface px-4 py-3 text-[13px] leading-relaxed text-foreground-soft shadow-border-sm">
+          Two quick examples: for Scale{" "}
+          <MatrixDisplay
+            size="sm"
+            a={<Subscript base="s" sub="x" />}
+            b="0"
+            c="0"
+            d={<Subscript base="s" sub="y" />}
+          />
+          , trace = <Subscript base="s" sub="x" /> + <Subscript base="s" sub="y" /> — the diagonal
+          entries are already the eigenvalues. For Rotation R(θ), trace ={" "}
+          <span className="font-mono">2·cosθ</span> — the imaginary parts of the two complex
+          eigenvalues (cosθ ± i·sinθ) cancel out, leaving a real sum.
+        </p>
 
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2 text-[13px] font-medium text-foreground-soft">
